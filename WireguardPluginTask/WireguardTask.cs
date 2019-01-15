@@ -93,22 +93,28 @@ namespace WireguardPluginTask
                 theirPublic,
                 new byte[][] { preshared }))
             {
-                var datagramSocket = new DatagramSocket();
-                var now = DateTimeOffset.UtcNow;
+
+                var now = DateTimeOffset.UtcNow; //replace with Noda.Time?
                 var tai64n = new byte[12];
                 (4611686018427387914ul + (ulong) now.ToUnixTimeSeconds()).ToBigEndian(tai64n);
                 ((uint) (now.Millisecond * 1e6)).ToBigEndian(tai64n, 8);
-                var initiationPacket = new List<byte> {1, 0, 0, 0};
-                initiationPacket.AddRange(((uint)28).ToLittleEndian());
-                var (bytesWritten, _, _) = hs.WriteMessage(tai64n, buffer);
-                initiationPacket.AddRange(buffer.Take(bytesWritten));
+
+                var initiationPacket = new List<byte> {1, 0, 0, 0};             //type initiation
+                initiationPacket.AddRange(((uint)28).ToLittleEndian());         //sender, random 4byte
+
+                var (bytesWritten, _, _) = hs.WriteMessage(tai64n, buffer);  
+                initiationPacket.AddRange(buffer.Take(bytesWritten));           // should be 24byte, ephemeral, static, timestamp
+
                 var hasher = Blake2s.CreateIncrementalHasher(32);
                 hasher.Update(Encoding.UTF8.GetBytes("mac1----"));
                 hasher.Update(theirPublic);
                 hasher = Blake2s.CreateIncrementalHasher(16, hasher.Finish());
                 hasher.Update(initiationPacket.ToArray());
-                initiationPacket.AddRange(hasher.Finish().Take(16));
-                initiationPacket.AddRange(Enumerable.Repeat((byte)0,16));
+
+                initiationPacket.AddRange(hasher.Finish().Take(16));            //mac1
+                initiationPacket.AddRange(Enumerable.Repeat((byte)0,16));       //mac2 = zeros if no cookie last received
+
+
                 var socket = new DatagramSocket();
                 var responsePacket = new TaskCompletionSource<int>();
                 var autoResetEvent = new AutoResetEvent(false);
@@ -121,15 +127,17 @@ namespace WireguardPluginTask
                 var streamWriter = new BinaryWriter(socket.OutputStream.AsStreamForWrite());
                 streamWriter.Write(initiationPacket.ToArray());
                 streamWriter.Flush();
-
+                
                 var successful = autoResetEvent.WaitOne(5000);
                 if (!successful)
                     return;
-                var i = bufferRead;
-                if (i != 92)
-                    return; //"response packet too short: want %d, got %d"
-                if (buffer[0] != 2)
+
+                if (buffer[0] != 2)                                             //type init response
                     return;//"response packet type wrong: want %d, got %d"
+
+                if (bufferRead != 92) //always this length! for type=2
+                    return; //"response packet too short: want %d, got %d"
+
                 if (buffer[1] != 0 || buffer[2] != 0 || buffer[3] != 0)
                     return; //"response packet has non-zero reserved fields"
                 var theirIndex = buffer.LittleEndianToUInt32(4);
@@ -137,10 +145,14 @@ namespace WireguardPluginTask
                 if( ourIndex != 28 )
                     return; //log.Fatalf("response packet index wrong: want %d, got %d", 28, ourIndex)
                 var span = new Span<byte>(buffer);
-                var (bytesRead, handshakeHash, transport) = hs.ReadMessage(span.Slice(12,60-12),span.Slice(100));
+                var (bytesRead, handshakeHash, transport) = hs.ReadMessage(span.Slice(12,48),
+                    span.Slice(100)); //write on same buffer behind the received package (which 
                 if (bytesRead != 0)
                     return; //"unexpected payload: %x"
                 
+
+
+
                 var icmpHeader = new IcmpHeader() {Type = 8, Id = 921, Sequence = 438};
                 var pingMessage = icmpHeader.GetProtocolPacketBytes(Encoding.UTF8.GetBytes("WireGuard"));
                 var pingHeader = new Ipv4Header()
@@ -155,8 +167,10 @@ namespace WireguardPluginTask
                 span[0] = 4;
                 span.Slice(1,3).Assign((byte)0);
                 theirIndex.ToLittleEndian(buffer, 4);
-                span.Slice(8,8).Assign((byte)0);
-                bytesWritten = transport.WriteMessage(pingHeader.Concat(pingMessage).Concat(Enumerable.Repeat((byte)0,11)).ToArray(), span.Slice(16));
+                0L.ToLittleEndian(buffer,8);                            //this is the counter, little endian u64
+                bytesWritten = transport.WriteMessage(
+                    pingHeader.Concat(pingMessage).Concat(Enumerable.Repeat((byte)0,11)).ToArray(), //pad message with 0 to make mod 16=0
+                    span.Slice(16));
 
                 //using (var streamWriter = new BinaryWriter(socket.OutputStream.AsStreamForWrite()))
                     streamWriter.Write(span.Slice(0,16+bytesWritten).ToArray());
@@ -164,6 +178,7 @@ namespace WireguardPluginTask
                 successful = autoResetEvent.WaitOne(5000);
                 if (!successful)
                     return;
+
                 if (buffer[0] != 4)
                     return;//"response packet type wrong: want %d, got %d"
                 if (buffer[1] != 0 || buffer[2] != 0 || buffer[3] != 0)
@@ -276,6 +291,9 @@ namespace WireguardPluginTask
                 var packetTransportContext = packet.TransportContext;
                 
                 encapulatedPackets.Append(packet);
+
+                //parse ip datagram and inspect destination IP
+                //if destIP isn't found in peer list, drop and send ICMP "no route to host"?
             }
         }
         public void Decapsulate(VpnChannel channel, VpnPacketBuffer encapBuffer, VpnPacketBufferList decapsulatedPackets,
