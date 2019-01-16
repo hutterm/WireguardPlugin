@@ -231,17 +231,11 @@ namespace WireguardPluginTask
         /// </summary>
         class Ipv4Header : ProtocolHeader
         {
-            private byte ipVersion;               // actually only 4 bits
             private byte ipLength;                // actually only 4 bits
-            private byte ipTypeOfService;
             private ushort ipTotalLength;
             private ushort ipId;
             private ushort ipOffset;
-            private byte ipTtl;
-            private byte ipProtocol;
             private ushort ipChecksum;
-            private IPAddress ipSourceAddress;
-            private IPAddress ipDestinationAddress;
 
             static public int Ipv4HeaderLength = 20;
 
@@ -250,32 +244,22 @@ namespace WireguardPluginTask
             /// </summary>
             public Ipv4Header() : base()
             {
-                ipVersion = 4;
+                Version = 4;
                 ipLength = (byte)Ipv4HeaderLength;    // Set the property so it will convert properly
-                ipTypeOfService = 0;
+                TypeOfService = 0;
                 ipId = 0;
                 ipOffset = 0;
-                ipTtl = 1;
-                ipProtocol = 0;
+                Ttl = 1;
+                Protocol = 0;
                 ipChecksum = 0;
-                ipSourceAddress = IPAddress.Any;
-                ipDestinationAddress = IPAddress.Any;
+                SourceAddress = IPAddress.Any;
+                DestinationAddress = IPAddress.Any;
             }
 
             /// <summary>
             /// Gets and sets the IP version. This should be 4 to indicate the IPv4 header.
             /// </summary>
-            public byte Version
-            {
-                get
-                {
-                    return ipVersion;
-                }
-                set
-                {
-                    ipVersion = value;
-                }
-            }
+            public byte Version { get; set; }
 
             /// <summary>
             /// Gets and sets the length of the IPv4 header. This property takes and returns
@@ -284,31 +268,15 @@ namespace WireguardPluginTask
             /// </summary>
             public byte Length
             {
-                get
-                {
-                    return (byte)(ipLength * 4);
-                }
-                set
-                {
-                    ipLength = (byte)(value / 4);
-                }
+                get => (byte)(ipLength * 4);
+                set => ipLength = (byte)(value / 4);
             }
 
             /// <summary>
             /// Gets and sets the type of service field of the IPv4 header. Since it
             /// is a byte, no byte order conversion is required.
             /// </summary>
-            public byte TypeOfService
-            {
-                get
-                {
-                    return ipTypeOfService;
-                }
-                set
-                {
-                    ipTypeOfService = value;
-                }
-            }
+            public byte TypeOfService { get; set; }
 
             /// <summary>
             ///  Gets and sets the total length of the IPv4 header and its encapsulated
@@ -316,14 +284,8 @@ namespace WireguardPluginTask
             /// </summary>
             public ushort TotalLength
             {
-                get
-                {
-                    return (ushort)IPAddress.NetworkToHostOrder((short)ipTotalLength);
-                }
-                set
-                {
-                    ipTotalLength = (ushort)IPAddress.HostToNetworkOrder((short)value);
-                }
+                get => (ushort)IPAddress.NetworkToHostOrder((short)ipTotalLength);
+                set => ipTotalLength = (ushort)IPAddress.HostToNetworkOrder((short)value);
             }
 
             /// <summary>
@@ -332,14 +294,8 @@ namespace WireguardPluginTask
             /// </summary>
             public ushort Id
             {
-                get
-                {
-                    return (ushort)IPAddress.NetworkToHostOrder((short)ipId);
-                }
-                set
-                {
-                    ipId = (ushort)IPAddress.HostToNetworkOrder((short)value);
-                }
+                get => (ushort)IPAddress.NetworkToHostOrder((short)ipId);
+                set => ipId = (ushort)IPAddress.HostToNetworkOrder((short)value);
             }
 
             /// <summary>
@@ -348,47 +304,21 @@ namespace WireguardPluginTask
             /// </summary>
             public ushort Offset
             {
-                get
-                {
-                    return (ushort)IPAddress.NetworkToHostOrder((short)ipOffset);
-                }
-                set
-                {
-                    ipOffset = (ushort)IPAddress.HostToNetworkOrder((short)value);
-                }
+                get => (ushort)IPAddress.NetworkToHostOrder((short)ipOffset);
+                set => ipOffset = (ushort)IPAddress.HostToNetworkOrder((short)value);
             }
 
             /// <summary>
             /// Gets and sets the time-to-live (TTL) value of the IP header. This field
             /// determines how many router hops the packet is valid for.
             /// </summary>
-            public byte Ttl
-            {
-                get
-                {
-                    return ipTtl;
-                }
-                set
-                {
-                    ipTtl = value;
-                }
-            }
+            public byte Ttl { get; set; }
 
             /// <summary>
             /// Gets and sets the protocol field of the IPv4 header. This field indicates
             /// what the encapsulated protocol is.
             /// </summary>
-            public byte Protocol
-            {
-                get
-                {
-                    return ipProtocol;
-                }
-                set
-                {
-                    ipProtocol = value;
-                }
-            }
+            public byte Protocol { get; set; }
 
             /// <summary>
             /// Gets and sets the checksum field of the IPv4 header. For the IPv4 header, the 
@@ -398,14 +328,8 @@ namespace WireguardPluginTask
             /// </summary>
             public ushort Checksum
             {
-                get
-                {
-                    return (ushort)IPAddress.NetworkToHostOrder((short)ipChecksum);
-                }
-                set
-                {
-                    ipChecksum = (ushort)IPAddress.HostToNetworkOrder((short)value);
-                }
+                get => (ushort)IPAddress.NetworkToHostOrder((short)ipChecksum);
+                set => ipChecksum = (ushort)IPAddress.HostToNetworkOrder((short)value);
             }
 
             /// <summary>
@@ -413,34 +337,14 @@ namespace WireguardPluginTask
             /// as an IPAddress object which will be serialized to the appropriate
             /// byte representation in the GetProtocolPacketBytes method.
             /// </summary>
-            public IPAddress SourceAddress
-            {
-                get
-                {
-                    return ipSourceAddress;
-                }
-                set
-                {
-                    ipSourceAddress = value;
-                }
-            }
+            public IPAddress SourceAddress { get; set; }
 
             /// <summary>
             /// Gets and sets the destination IP address of the IPv4 packet. This is stored
             /// as an IPAddress object which will be serialized to the appropriate byte
             /// representation in the GetProtocolPacketBytes method.
             /// </summary>
-            public IPAddress DestinationAddress
-            {
-                get
-                {
-                    return ipDestinationAddress;
-                }
-                set
-                {
-                    ipDestinationAddress = value;
-                }
-            }
+            public IPAddress DestinationAddress { get; set; }
 
             /// <summary>
             /// This routine creates an instance of the Ipv4Header class from a byte
@@ -460,18 +364,18 @@ namespace WireguardPluginTask
                     return null;
 
                 // Decode the data in the array back into the class properties
-                ipv4Header.ipVersion = (byte)((ipv4Packet[0] >> 4) & 0xF);
+                ipv4Header.Version = (byte)((ipv4Packet[0] >> 4) & 0xF);
                 ipv4Header.ipLength = (byte)(ipv4Packet[0] & 0xF);
-                ipv4Header.ipTypeOfService = ipv4Packet[1];
+                ipv4Header.TypeOfService = ipv4Packet[1];
                 ipv4Header.ipTotalLength = BitConverter.ToUInt16(ipv4Packet, 2);
                 ipv4Header.ipId = BitConverter.ToUInt16(ipv4Packet, 4);
                 ipv4Header.ipOffset = BitConverter.ToUInt16(ipv4Packet, 6);
-                ipv4Header.ipTtl = ipv4Packet[8];
-                ipv4Header.ipProtocol = ipv4Packet[9];
+                ipv4Header.Ttl = ipv4Packet[8];
+                ipv4Header.Protocol = ipv4Packet[9];
                 ipv4Header.ipChecksum = BitConverter.ToUInt16(ipv4Packet, 10);
 
-                ipv4Header.ipSourceAddress = new IPAddress(BitConverter.ToUInt32(ipv4Packet, 12));
-                ipv4Header.ipDestinationAddress = new IPAddress(BitConverter.ToUInt32(ipv4Packet, 16));
+                ipv4Header.SourceAddress = new IPAddress(BitConverter.ToUInt32(ipv4Packet, 12));
+                ipv4Header.DestinationAddress = new IPAddress(BitConverter.ToUInt32(ipv4Packet, 16));
 
                 bytesCopied = ipv4Header.Length;
 
@@ -493,8 +397,8 @@ namespace WireguardPluginTask
                 // Allocate space for the IPv4 header plus payload
                 ipv4Packet = new byte[Ipv4HeaderLength + payLoad.Length];
 
-                ipv4Packet[index++] = (byte)((ipVersion << 4) | ipLength);
-                ipv4Packet[index++] = ipTypeOfService;
+                ipv4Packet[index++] = (byte)((Version << 4) | ipLength);
+                ipv4Packet[index++] = TypeOfService;
 
                 byteValue = BitConverter.GetBytes(ipTotalLength);
                 Array.Copy(byteValue, 0, ipv4Packet, index, byteValue.Length);
@@ -508,18 +412,18 @@ namespace WireguardPluginTask
                 Array.Copy(byteValue, 0, ipv4Packet, index, byteValue.Length);
                 index += byteValue.Length;
 
-                ipv4Packet[index++] = ipTtl;
-                ipv4Packet[index++] = ipProtocol;
+                ipv4Packet[index++] = Ttl;
+                ipv4Packet[index++] = Protocol;
                 ipv4Packet[index++] = 0; // Zero the checksum for now since we will
                 ipv4Packet[index++] = 0; // calculate it later
 
                 // Copy the source address
-                byteValue = ipSourceAddress.GetAddressBytes();
+                byteValue = SourceAddress.GetAddressBytes();
                 Array.Copy(byteValue, 0, ipv4Packet, index, byteValue.Length);
                 index += byteValue.Length;
 
                 // Copy the destination address
-                byteValue = ipDestinationAddress.GetAddressBytes();
+                byteValue = DestinationAddress.GetAddressBytes();
                 Array.Copy(byteValue, 0, ipv4Packet, index, byteValue.Length);
                 index += byteValue.Length;
 
@@ -543,14 +447,8 @@ namespace WireguardPluginTask
         /// </summary>
         class Ipv6Header : ProtocolHeader
         {
-            private byte ipVersion;
-            private byte ipTrafficClass;
             private uint ipFlow;
             private ushort ipPayloadLength;
-            private byte ipNextHeader;
-            private byte ipHopLimit;
-            private IPAddress ipSourceAddress;
-            private IPAddress ipDestinationAddress;
 
             static public int Ipv6HeaderLength = 40;
 
@@ -560,45 +458,25 @@ namespace WireguardPluginTask
             public Ipv6Header()
                 : base()
             {
-                ipVersion = 6;
-                ipTrafficClass = 0;
+                Version = 6;
+                TrafficClass = 0;
                 ipFlow = 0;
                 ipPayloadLength = 0;
-                ipNextHeader = 0;
-                ipHopLimit = 32;
-                ipSourceAddress = IPAddress.IPv6Any;
-                ipDestinationAddress = IPAddress.IPv6Any;
+                NextHeader = 0;
+                HopLimit = 32;
+                SourceAddress = IPAddress.IPv6Any;
+                DestinationAddress = IPAddress.IPv6Any;
             }
 
             /// <summary>
             /// Gets and sets the IP version. This value should be 6.
             /// </summary>
-            public byte Version
-            {
-                get
-                {
-                    return ipVersion;
-                }
-                set
-                {
-                    ipVersion = value;
-                }
-            }
+            public byte Version { get; set; }
 
             /// <summary>
             /// Gets and sets the traffic class for the header. 
             /// </summary>
-            public byte TrafficClass
-            {
-                get
-                {
-                    return ipTrafficClass;
-                }
-                set
-                {
-                    ipTrafficClass = value;
-                }
-            }
+            public byte TrafficClass { get; set; }
 
             /// <summary>
             /// Gets and sets the flow value for the packet. Byte order conversion
@@ -606,14 +484,8 @@ namespace WireguardPluginTask
             /// </summary>
             public uint Flow
             {
-                get
-                {
-                    return (uint)IPAddress.NetworkToHostOrder((int)ipFlow);
-                }
-                set
-                {
-                    ipFlow = (uint)IPAddress.HostToNetworkOrder((int)value);
-                }
+                get => (uint)IPAddress.NetworkToHostOrder((int)ipFlow);
+                set => ipFlow = (uint)IPAddress.HostToNetworkOrder((int)value);
             }
 
             /// <summary>
@@ -623,75 +495,29 @@ namespace WireguardPluginTask
             /// </summary>
             public ushort PayloadLength
             {
-                get
-                {
-                    return (ushort)IPAddress.NetworkToHostOrder((short)ipPayloadLength);
-                }
-                set
-                {
-                    ipPayloadLength = (ushort)IPAddress.HostToNetworkOrder((short)value);
-                }
+                get => (ushort)IPAddress.NetworkToHostOrder((short)ipPayloadLength);
+                set => ipPayloadLength = (ushort)IPAddress.HostToNetworkOrder((short)value);
             }
 
             /// <summary>
             /// The protocol value of the header encapsulated by the IPv6 header.
             /// </summary>
-            public byte NextHeader
-            {
-                get
-                {
-                    return ipNextHeader;
-                }
-                set
-                {
-                    ipNextHeader = value;
-                }
-            }
+            public byte NextHeader { get; set; }
 
             /// <summary>
             /// Time-to-live (TTL) of the IPv6 header.
             /// </summary>
-            public byte HopLimit
-            {
-                get
-                {
-                    return ipHopLimit;
-                }
-                set
-                {
-                    ipHopLimit = value;
-                }
-            }
+            public byte HopLimit { get; set; }
 
             /// <summary>
             /// IPv6 source address in the IPv6 header.
             /// </summary>
-            public IPAddress SourceAddress
-            {
-                get
-                {
-                    return ipSourceAddress;
-                }
-                set
-                {
-                    ipSourceAddress = value;
-                }
-            }
+            public IPAddress SourceAddress { get; set; }
 
             /// <summary>
             /// IPv6 destination address in the IPv6 header.
             /// </summary>
-            public IPAddress DestinationAddress
-            {
-                get
-                {
-                    return ipDestinationAddress;
-                }
-                set
-                {
-                    ipDestinationAddress = value;
-                }
-            }
+            public IPAddress DestinationAddress { get; set; }
 
             /// <summary>
             /// This routine creates an instance of the Ipv6Header class from a byte
@@ -715,11 +541,11 @@ namespace WireguardPluginTask
 
                 tempVal = ipv6Packet[0];
                 tempVal = (tempVal >> 4) & 0xF;
-                ipv6Header.ipVersion = (byte)tempVal;
+                ipv6Header.Version = (byte)tempVal;
 
                 tempVal = ipv6Packet[0];
                 tempVal = (tempVal & 0xF) >> 4;
-                ipv6Header.ipTrafficClass = (byte)(tempVal | (uint)((ipv6Packet[1] >> 4) & 0xF));
+                ipv6Header.TrafficClass = (byte)(tempVal | (uint)((ipv6Packet[1] >> 4) & 0xF));
 
                 tempVal2 = ipv6Packet[1];
                 tempVal2 = (tempVal2 & 0xF) << 16;
@@ -727,8 +553,8 @@ namespace WireguardPluginTask
                 tempVal = tempVal << 8;
                 ipv6Header.ipFlow = tempVal2 | tempVal | ipv6Packet[3];
 
-                ipv6Header.ipNextHeader = ipv6Packet[4];
-                ipv6Header.ipHopLimit = ipv6Packet[5];
+                ipv6Header.NextHeader = ipv6Packet[4];
+                ipv6Header.HopLimit = ipv6Packet[5];
 
                 Array.Copy(ipv6Packet, 6, addressBytes, 0, 16);
                 ipv6Header.SourceAddress = new IPAddress(addressBytes);
@@ -755,29 +581,29 @@ namespace WireguardPluginTask
 
                 ipv6Packet = new byte[Ipv6HeaderLength + payLoad.Length];
 
-                ipv6Packet[offset++] = (byte)((ipVersion << 4) | ((ipTrafficClass >> 4) & 0xF));
+                ipv6Packet[offset++] = (byte)((Version << 4) | ((TrafficClass >> 4) & 0xF));
 
                 //tmpbyte1 = (byte) ( ( ipTrafficClass << 4) & 0xF0);
                 //tmpbyte2 = (byte) ( ( ipFlow >> 16 ) & 0xF );
 
-                ipv6Packet[offset++] = (byte)((uint)((ipTrafficClass << 4) & 0xF0) | (uint)((Flow >> 16) & 0xF));
+                ipv6Packet[offset++] = (byte)((uint)((TrafficClass << 4) & 0xF0) | (uint)((Flow >> 16) & 0xF));
                 ipv6Packet[offset++] = (byte)((Flow >> 8) & 0xFF);
                 ipv6Packet[offset++] = (byte)(Flow & 0xFF);
 
-                Console.WriteLine("Next header = {0}", ipNextHeader);
+                Console.WriteLine("Next header = {0}", NextHeader);
 
                 byteValue = BitConverter.GetBytes(ipPayloadLength);
                 Array.Copy(byteValue, 0, ipv6Packet, offset, byteValue.Length);
                 offset += byteValue.Length;
 
-                ipv6Packet[offset++] = (byte)ipNextHeader;
-                ipv6Packet[offset++] = (byte)ipHopLimit;
+                ipv6Packet[offset++] = (byte)NextHeader;
+                ipv6Packet[offset++] = (byte)HopLimit;
 
-                byteValue = ipSourceAddress.GetAddressBytes();
+                byteValue = SourceAddress.GetAddressBytes();
                 Array.Copy(byteValue, 0, ipv6Packet, offset, byteValue.Length);
                 offset += byteValue.Length;
 
-                byteValue = ipDestinationAddress.GetAddressBytes();
+                byteValue = DestinationAddress.GetAddressBytes();
                 Array.Copy(byteValue, 0, ipv6Packet, offset, byteValue.Length);
                 offset += byteValue.Length;
 
@@ -795,8 +621,6 @@ namespace WireguardPluginTask
         /// </summary>
         class Ipv6FragmentHeader
         {
-            private byte fragmentNextHeader;
-            private byte fragmentReserved;
             private ushort fragmentOffset;
             private uint fragmentId;
 
@@ -807,8 +631,8 @@ namespace WireguardPluginTask
             /// </summary>
             public Ipv6FragmentHeader()
             {
-                fragmentNextHeader = 0;
-                fragmentReserved = 0;
+                NextHeader = 0;
+                Reserved = 0;
                 fragmentOffset = 0;
                 fragmentId = 0;
             }
@@ -816,46 +640,20 @@ namespace WireguardPluginTask
             /// <summary>
             /// Gets and sets the next protocol value field.
             /// </summary>
-            public byte NextHeader
-            {
-                get
-                {
-                    return fragmentNextHeader;
-                }
-                set
-                {
-                    fragmentNextHeader = value;
-                }
-            }
+            public byte NextHeader { get; set; }
 
             /// <summary>
             /// Gets and sets the reserved field. Performs the necessary byte order conversion.
             /// </summary>
-            public byte Reserved
-            {
-                get
-                {
-                    return fragmentReserved;
-                }
-                set
-                {
-                    fragmentReserved = value;
-                }
-            }
+            public byte Reserved { get; set; }
 
             /// <summary>
             /// Gets and sets the offset field. Performs the necessary byte order conversion.
             /// </summary>
             public ushort Offset
             {
-                get
-                {
-                    return (ushort)IPAddress.NetworkToHostOrder((short)fragmentOffset);
-                }
-                set
-                {
-                    fragmentOffset = (ushort)IPAddress.HostToNetworkOrder((short)value);
-                }
+                get => (ushort)IPAddress.NetworkToHostOrder((short)fragmentOffset);
+                set => fragmentOffset = (ushort)IPAddress.HostToNetworkOrder((short)value);
             }
 
             /// <summary>
@@ -863,14 +661,8 @@ namespace WireguardPluginTask
             /// </summary>
             public uint Id
             {
-                get
-                {
-                    return (uint)IPAddress.NetworkToHostOrder((int)fragmentId);
-                }
-                set
-                {
-                    fragmentId = (uint)IPAddress.HostToNetworkOrder((int)value);
-                }
+                get => (uint)IPAddress.NetworkToHostOrder((int)fragmentId);
+                set => fragmentId = (uint)IPAddress.HostToNetworkOrder((int)value);
             }
         }
 
@@ -879,8 +671,6 @@ namespace WireguardPluginTask
         /// </summary>
         class IcmpHeader : ProtocolHeader
         {
-            private byte icmpType;                   // ICMP message type
-            private byte icmpCode;                   // ICMP message code
             private ushort icmpChecksum;               // Checksum of ICMP header and payload
             private ushort icmpId;                     // Message ID
             private ushort icmpSequence;               // ICMP sequence number
@@ -898,8 +688,8 @@ namespace WireguardPluginTask
             public IcmpHeader()
                 : base()
             {
-                icmpType = 0;
-                icmpCode = 0;
+                Type = 0;
+                Code = 0;
                 icmpChecksum = 0;
                 icmpId = 0;
                 icmpSequence = 0;
@@ -908,46 +698,20 @@ namespace WireguardPluginTask
             /// <summary>
             /// ICMP message type.
             /// </summary>
-            public byte Type
-            {
-                get
-                {
-                    return icmpType;
-                }
-                set
-                {
-                    icmpType = value;
-                }
-            }
+            public byte Type { get; set; }
 
             /// <summary>
             /// ICMP message code.
             /// </summary>
-            public byte Code
-            {
-                get
-                {
-                    return icmpCode;
-                }
-                set
-                {
-                    icmpCode = value;
-                }
-            }
+            public byte Code { get; set; }
 
             /// <summary>
             /// Checksum of ICMP packet and payload.  Performs the necessary byte order conversion.
             /// </summary>
             public ushort Checksum
             {
-                get
-                {
-                    return (ushort)IPAddress.NetworkToHostOrder((short)icmpChecksum);
-                }
-                set
-                {
-                    icmpChecksum = (ushort)IPAddress.HostToNetworkOrder((short)value);
-                }
+                get => (ushort)IPAddress.NetworkToHostOrder((short)icmpChecksum);
+                set => icmpChecksum = (ushort)IPAddress.HostToNetworkOrder((short)value);
             }
 
             /// <summary>
@@ -956,14 +720,8 @@ namespace WireguardPluginTask
             /// </summary>
             public ushort Id
             {
-                get
-                {
-                    return (ushort)IPAddress.NetworkToHostOrder((short)icmpId);
-                }
-                set
-                {
-                    icmpId = (ushort)IPAddress.HostToNetworkOrder((short)value);
-                }
+                get => (ushort)IPAddress.NetworkToHostOrder((short)icmpId);
+                set => icmpId = (ushort)IPAddress.HostToNetworkOrder((short)value);
             }
 
             /// <summary>
@@ -972,14 +730,8 @@ namespace WireguardPluginTask
             /// </summary>
             public ushort Sequence
             {
-                get
-                {
-                    return (ushort)IPAddress.NetworkToHostOrder((short)icmpSequence);
-                }
-                set
-                {
-                    icmpSequence = (ushort)IPAddress.HostToNetworkOrder((short)value);
-                }
+                get => (ushort)IPAddress.NetworkToHostOrder((short)icmpSequence);
+                set => icmpSequence = (ushort)IPAddress.HostToNetworkOrder((short)value);
             }
 
             /// <summary>
@@ -1000,8 +752,8 @@ namespace WireguardPluginTask
                 if (icmpPacket.Length < IcmpHeader.IcmpHeaderLength)
                     return null;
 
-                icmpHeader.icmpType = icmpPacket[offset++];
-                icmpHeader.icmpCode = icmpPacket[offset++];
+                icmpHeader.Type = icmpPacket[offset++];
+                icmpHeader.Code = icmpPacket[offset++];
                 icmpHeader.icmpChecksum = BitConverter.ToUInt16(icmpPacket, offset);
                 offset += 2;
                 icmpHeader.icmpId = BitConverter.ToUInt16(icmpPacket, offset);
@@ -1028,8 +780,8 @@ namespace WireguardPluginTask
 
                 icmpPacket = new byte[IcmpHeaderLength + payLoad.Length];
 
-                icmpPacket[offset++] = icmpType;
-                icmpPacket[offset++] = icmpCode;
+                icmpPacket[offset++] = Type;
+                icmpPacket[offset++] = Code;
                 icmpPacket[offset++] = 0;          // Zero out the checksum until the packet is assembled
                 icmpPacket[offset++] = 0;
 
@@ -1064,10 +816,7 @@ namespace WireguardPluginTask
         /// </summary>
         class IgmpHeader : ProtocolHeader
         {
-            private byte igmpVersionType;
-            private byte igmpMaxResponseTime;
             private ushort igmpChecksum;
-            private IPAddress igmpGroupAddress;
 
             static public int IgmpHeaderLength = 8;
 
@@ -1087,71 +836,35 @@ namespace WireguardPluginTask
             public IgmpHeader()
                 : base()
             {
-                igmpVersionType = IgmpMembershipQuery;
-                igmpMaxResponseTime = 0;
+                VersionType = IgmpMembershipQuery;
+                MaximumResponseTime = 0;
                 igmpChecksum = 0;
-                igmpGroupAddress = IPAddress.Any;
+                GroupAddress = IPAddress.Any;
             }
 
             /// <summary>
             /// Sets both the version and type codes. Since the version and type codes
             /// are tied together there is only one property which sets both values.
             /// </summary>
-            public byte VersionType
-            {
-                get
-                {
-                    return igmpVersionType;
-                }
-                set
-                {
-                    igmpVersionType = value;
-                }
-            }
+            public byte VersionType { get; set; }
 
             /// <summary>
             /// The maximum response time for the IGMP query.
             /// </summary>
-            public byte MaximumResponseTime
-            {
-                get
-                {
-                    return igmpMaxResponseTime;
-                }
-                set
-                {
-                    igmpMaxResponseTime = value;
-                }
-            }
+            public byte MaximumResponseTime { get; set; }
 
             /// <summary>
             /// The multicast group address for the IGMP message.
             /// </summary>
-            public IPAddress GroupAddress
-            {
-                get
-                {
-                    return igmpGroupAddress;
-                }
-                set
-                {
-                    igmpGroupAddress = value;
-                }
-            }
+            public IPAddress GroupAddress { get; set; }
 
             /// <summary>
             /// Checksum value for the IGMP packet and payload.
             /// </summary>
             public ushort Checksum
             {
-                get
-                {
-                    return (ushort)IPAddress.NetworkToHostOrder((short)igmpChecksum);
-                }
-                set
-                {
-                    igmpChecksum = (ushort)IPAddress.HostToNetworkOrder((short)value);
-                }
+                get => (ushort)IPAddress.NetworkToHostOrder((short)igmpChecksum);
+                set => igmpChecksum = (ushort)IPAddress.HostToNetworkOrder((short)value);
             }
 
             /// <summary>
@@ -1172,8 +885,8 @@ namespace WireguardPluginTask
                 if (igmpPacket.Length < IgmpHeader.IgmpHeaderLength)
                     return null;
 
-                igmpHeader.igmpVersionType = igmpPacket[offset++];
-                igmpHeader.igmpMaxResponseTime = igmpPacket[offset++];
+                igmpHeader.VersionType = igmpPacket[offset++];
+                igmpHeader.MaximumResponseTime = igmpPacket[offset++];
                 igmpHeader.igmpChecksum = BitConverter.ToUInt16(igmpPacket, offset);
 
                 bytesCopied = IgmpHeader.IgmpHeaderLength;
@@ -1197,13 +910,13 @@ namespace WireguardPluginTask
                 igmpPacket = new byte[IgmpHeaderLength + payLoad.Length];
 
                 // Build the IGMP packet
-                igmpPacket[offset++] = igmpVersionType;
-                igmpPacket[offset++] = igmpMaxResponseTime;
+                igmpPacket[offset++] = VersionType;
+                igmpPacket[offset++] = MaximumResponseTime;
                 igmpPacket[offset++] = 0;  // Zero the checksum for now
                 igmpPacket[offset++] = 0;
 
                 // Copy the group address bytes
-                addressBytes = igmpGroupAddress.GetAddressBytes();
+                addressBytes = GroupAddress.GetAddressBytes();
                 Array.Copy(addressBytes, 0, igmpPacket, offset, addressBytes.Length);
                 offset += addressBytes.Length;
 
@@ -1232,8 +945,6 @@ namespace WireguardPluginTask
         /// </summary>
         class Icmpv6Header : ProtocolHeader
         {
-            private byte icmpType;
-            private byte icmpCode;
             private ushort icmpChecksum;
 
             public Ipv6Header ipv6Header;
@@ -1252,8 +963,8 @@ namespace WireguardPluginTask
             public Icmpv6Header()
                 : base()
             {
-                icmpType = 0;
-                icmpCode = 0;
+                Type = 0;
+                Code = 0;
                 icmpChecksum = 0;
             }
 
@@ -1268,8 +979,8 @@ namespace WireguardPluginTask
             public Icmpv6Header(Ipv6Header packetHeader)
                 : base()
             {
-                icmpType = 0;
-                icmpCode = 0;
+                Type = 0;
+                Code = 0;
                 icmpChecksum = 0;
                 ipv6Header = packetHeader;
             }
@@ -1277,32 +988,12 @@ namespace WireguardPluginTask
             /// <summary>
             /// Sets the ICMPv6 message type.
             /// </summary>
-            public byte Type
-            {
-                get
-                {
-                    return icmpType;
-                }
-                set
-                {
-                    icmpType = value;
-                }
-            }
+            public byte Type { get; set; }
 
             /// <summary>
             /// Sets the ICMPv6 code type.
             /// </summary>
-            public byte Code
-            {
-                get
-                {
-                    return icmpCode;
-                }
-                set
-                {
-                    icmpCode = value;
-                }
-            }
+            public byte Code { get; set; }
 
             /// <summary>
             /// The ICMPv6 checksum value. This value is computed over the ICMPv6 header, payload, 
@@ -1310,14 +1001,8 @@ namespace WireguardPluginTask
             /// </summary>
             public ushort Checksum
             {
-                get
-                {
-                    return (ushort)IPAddress.NetworkToHostOrder((short)icmpChecksum);
-                }
-                set
-                {
-                    icmpChecksum = (ushort)IPAddress.HostToNetworkOrder((short)value);
-                }
+                get => (ushort)IPAddress.NetworkToHostOrder((short)icmpChecksum);
+                set => icmpChecksum = (ushort)IPAddress.HostToNetworkOrder((short)value);
             }
 
             /// <summary>
@@ -1338,8 +1023,8 @@ namespace WireguardPluginTask
                 if (icmpv6Packet.Length < Icmpv6Header.Icmpv6HeaderLength)
                     return null;
 
-                icmpv6Header.icmpType = icmpv6Packet[offset++];
-                icmpv6Header.icmpCode = icmpv6Packet[offset++];
+                icmpv6Header.Type = icmpv6Packet[offset++];
+                icmpv6Header.Code = icmpv6Packet[offset++];
                 icmpv6Header.icmpChecksum = BitConverter.ToUInt16(icmpv6Packet, offset);
 
                 bytesCopied = Icmpv6Header.Icmpv6HeaderLength;
@@ -1367,8 +1052,8 @@ namespace WireguardPluginTask
                 icmpv6Packet = new byte[Icmpv6HeaderLength + payLoad.Length];
 
                 offset = 0;
-                icmpv6Packet[offset++] = icmpType;
-                icmpv6Packet[offset++] = icmpCode;
+                icmpv6Packet[offset++] = Type;
+                icmpv6Packet[offset++] = Code;
                 icmpv6Packet[offset++] = 0;
                 icmpv6Packet[offset++] = 0;
 
@@ -1445,14 +1130,8 @@ namespace WireguardPluginTask
             /// </summary>
             public ushort Id
             {
-                get
-                {
-                    return (ushort)IPAddress.NetworkToHostOrder((short)echoId);
-                }
-                set
-                {
-                    echoId = (ushort)IPAddress.HostToNetworkOrder((short)value);
-                }
+                get => (ushort)IPAddress.NetworkToHostOrder((short)echoId);
+                set => echoId = (ushort)IPAddress.HostToNetworkOrder((short)value);
             }
 
             /// <summary>
@@ -1460,14 +1139,8 @@ namespace WireguardPluginTask
             /// </summary>
             public ushort Sequence
             {
-                get
-                {
-                    return (ushort)IPAddress.NetworkToHostOrder((short)echoSequence);
-                }
-                set
-                {
-                    echoSequence = (ushort)IPAddress.HostToNetworkOrder((short)value);
-                }
+                get => (ushort)IPAddress.NetworkToHostOrder((short)echoSequence);
+                set => echoSequence = (ushort)IPAddress.HostToNetworkOrder((short)value);
             }
 
             /// <summary>
@@ -1558,14 +1231,8 @@ namespace WireguardPluginTask
             /// </summary>
             public ushort SourcePort
             {
-                get
-                {
-                    return (ushort)IPAddress.NetworkToHostOrder((short)srcPort);
-                }
-                set
-                {
-                    srcPort = (ushort)IPAddress.HostToNetworkOrder((short)value);
-                }
+                get => (ushort)IPAddress.NetworkToHostOrder((short)srcPort);
+                set => srcPort = (ushort)IPAddress.HostToNetworkOrder((short)value);
             }
 
             /// <summary>
@@ -1573,14 +1240,8 @@ namespace WireguardPluginTask
             /// </summary>
             public ushort DestinationPort
             {
-                get
-                {
-                    return (ushort)IPAddress.NetworkToHostOrder((short)destPort);
-                }
-                set
-                {
-                    destPort = (ushort)IPAddress.HostToNetworkOrder((short)value);
-                }
+                get => (ushort)IPAddress.NetworkToHostOrder((short)destPort);
+                set => destPort = (ushort)IPAddress.HostToNetworkOrder((short)value);
             }
 
             /// <summary>
@@ -1589,14 +1250,8 @@ namespace WireguardPluginTask
             /// </summary>
             public ushort Length
             {
-                get
-                {
-                    return (ushort)IPAddress.NetworkToHostOrder((short)udpLength);
-                }
-                set
-                {
-                    udpLength = (ushort)IPAddress.HostToNetworkOrder((short)value);
-                }
+                get => (ushort)IPAddress.NetworkToHostOrder((short)udpLength);
+                set => udpLength = (ushort)IPAddress.HostToNetworkOrder((short)value);
             }
 
             /// <summary>
@@ -1604,14 +1259,8 @@ namespace WireguardPluginTask
             /// </summary>
             public ushort Checksum
             {
-                get
-                {
-                    return (ushort)IPAddress.NetworkToHostOrder((short)udpChecksum);
-                }
-                set
-                {
-                    udpChecksum = (ushort)IPAddress.HostToNetworkOrder((short)value);
-                }
+                get => (ushort)IPAddress.NetworkToHostOrder((short)udpChecksum);
+                set => udpChecksum = (ushort)IPAddress.HostToNetworkOrder((short)value);
             }
 
             /// <summary>

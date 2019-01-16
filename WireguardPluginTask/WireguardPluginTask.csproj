@@ -122,7 +122,11 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="Constants.cs" />
+    <None Include="Cookie.cs" />
     <Compile Include="ICMPHeader.cs" />
+    <None Include="Keypair.cs" />
+    <None Include="Peer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WireguardTask.cs" />
   </ItemGroup>

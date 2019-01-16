@@ -232,17 +232,15 @@ namespace WireguardPluginTask
                 transport.ConnectAsync(new HostName(channel.Configuration.ServerUris[0].Scheme),
                     channel.Configuration.ServerUris[0].LocalPath).AsTask().Wait();
 
-                var vpnRouteAssignment = new VpnRouteAssignment();
-                vpnRouteAssignment.Ipv4InclusionRoutes.Add(new VpnRoute(new HostName("10.0.0.0"), 8));
+                var vpnRouteAssignment = new VpnRouteAssignment {ExcludeLocalSubnets = false};
                 vpnRouteAssignment.Ipv4InclusionRoutes.Add(new VpnRoute(new HostName("10.1.1.5"), 32));
-                vpnRouteAssignment.Ipv4InclusionRoutes.Add(new VpnRoute(new HostName("10.1.1.0"), 24));
 
                 var vpnDomainNameAssignment = new VpnDomainNameAssignment();
                 vpnDomainNameAssignment.DomainNameList.Add(new VpnDomainNameInfo("wireguard.host",VpnDomainNameType.FullyQualified, null,null));
                 vpnDomainNameAssignment.DomainNameList.Add(new VpnDomainNameInfo(".",VpnDomainNameType.Suffix, new []{new HostName("1.1.1.1"), },null));
                 channel.StartExistingTransports( 
                     new[] { new HostName("10.1.1.1"), //this is our network interface address
-                        new HostName("10.1.1.2"), }, 
+                        }, 
                     null,
                     null,
                     vpnRouteAssignment,
