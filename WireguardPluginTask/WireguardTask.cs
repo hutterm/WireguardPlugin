@@ -65,19 +65,25 @@ namespace WireguardPluginTask
         {
             for (var i = 0; i < s.Length; i++) s[i] = v;
         }
+        private static string GetCsByteArray(this byte[] a)
+        {
+            return $"new byte[]{{{string.Join(",", a.Select(b => $"0x{b:X2}"))}}}";
+        }
     }
     public sealed class WireguardVpnPlugin : IVpnPlugIn
     {
+        private static readonly byte[] OurPrivate = Convert.FromBase64String("WAmgVYXkbT2bCtdcDwolI88/iVi/aV3/PHcUBTQSYmo=");
+        private static readonly byte[] OurPublic = Convert.FromBase64String("K5sF9yESrSBsOXPd6TcpKNgqoy1Ik3ZFKl4FolzrRyI=");
+        private static readonly byte[] TheirPublic = Convert.FromBase64String("qRCwZSKInrMAq5sepfCdaCsRJaoLe5jhtzfiw7CjbwM=");
+        private static readonly byte[] Preshared = Convert.FromBase64String("FpCyhws9cxwWoV4xELtfJvjJN+zQVRPISllRWgeopVE=");
 
         internal const uint VPN_MTU = 1500;
         internal const uint VPN_MAX_FRAME = 1512;
 
+        
+
         public static void WireguardTest()
         {
-            var ourPrivate = Convert.FromBase64String("WAmgVYXkbT2bCtdcDwolI88/iVi/aV3/PHcUBTQSYmo=");
-            var ourPublic = Convert.FromBase64String("K5sF9yESrSBsOXPd6TcpKNgqoy1Ik3ZFKl4FolzrRyI=");
-            var theirPublic = Convert.FromBase64String("qRCwZSKInrMAq5sepfCdaCsRJaoLe5jhtzfiw7CjbwM=");
-            var preshared = Convert.FromBase64String("FpCyhws9cxwWoV4xELtfJvjJN+zQVRPISllRWgeopVE=");
             var protocol = new Protocol(
                 HandshakePattern.IK,
                 CipherFunction.ChaChaPoly,
@@ -89,9 +95,9 @@ namespace WireguardPluginTask
             int bufferRead = 0;
             using (var hs = protocol.Create(true,
                 new ReadOnlySpan<byte>(Encoding.UTF8.GetBytes("WireGuard v1 zx2c4 Jason@zx2c4.com")),
-                ourPrivate,
-                theirPublic,
-                new byte[][] { preshared }))
+                OurPrivate,
+                TheirPublic,
+                new byte[][] { Preshared }))
             {
 
                 var now = DateTimeOffset.UtcNow; //replace with Noda.Time?
@@ -106,12 +112,15 @@ namespace WireguardPluginTask
                 initiationPacket.AddRange(buffer.Take(bytesWritten));           // should be 24byte, ephemeral, static, timestamp
 
                 var hasher = Blake2s.CreateIncrementalHasher(32);
-                hasher.Update(Encoding.UTF8.GetBytes("mac1----"));
-                hasher.Update(theirPublic);
-                hasher = Blake2s.CreateIncrementalHasher(16, hasher.Finish());
-                hasher.Update(initiationPacket.ToArray());
+                var hashThis = Encoding.UTF8.GetBytes("mac1----").Concat(TheirPublic).ToArray();
+                hasher.Update(hashThis);
+                var finishedHash = hasher.Finish();
+                hasher = Blake2s.CreateIncrementalHasher(16, finishedHash);
+                hashThis = initiationPacket.ToArray();
+                hasher.Update(hashThis);
 
-                initiationPacket.AddRange(hasher.Finish().Take(16));            //mac1
+                finishedHash = hasher.Finish();
+                initiationPacket.AddRange(finishedHash);                        //mac1
                 initiationPacket.AddRange(Enumerable.Repeat((byte)0,16));       //mac2 = zeros if no cookie last received
 
 
@@ -150,7 +159,6 @@ namespace WireguardPluginTask
                 if (bytesRead != 0)
                     return; //"unexpected payload: %x"
                 
-
 
 
                 var icmpHeader = new IcmpHeader() {Type = 8, Id = 921, Sequence = 438};
@@ -206,12 +214,16 @@ namespace WireguardPluginTask
             }
         }
 
+        [DllImport("test.dll")]
+        static extern int goTestFunction(int a);
 
         public void Connect(VpnChannel channel)
         {
             try
             {
-                
+
+                var b = goTestFunction(1);
+
                 //var vpnCustomPromptTextInput = new VpnCustomPromptTextInput() { DisplayName = "Give me some input" };
                 ////this call is NOT asynchronous. awaiting the result will halt the program
                 //channel.RequestCustomPromptAsync(new IVpnCustomPromptElement[]
@@ -227,24 +239,21 @@ namespace WireguardPluginTask
                 //var streamSocket = new StreamSocket();
                 channel.AssociateTransport(transport, null);
                 //channel.LogDiagnosticMessage("this is from the wireguard plugin");// supposedly under Event Viewer, under Application and Services Logs\Microsoft\Windows\Vpn Plugin Platform. but can't find
-
-
+                //transport.BindServiceNameAsync("50000").AsTask().Wait();
+                //transport.BindEndpointAsync(new HostName("192.168.1.100"), "50000").AsTask().Wait();
                 transport.ConnectAsync(new HostName(channel.Configuration.ServerUris[0].Scheme),
                     channel.Configuration.ServerUris[0].LocalPath).AsTask().Wait();
 
                 var vpnRouteAssignment = new VpnRouteAssignment {ExcludeLocalSubnets = false};
-                vpnRouteAssignment.Ipv4InclusionRoutes.Add(new VpnRoute(new HostName("10.1.1.5"), 32));
+                vpnRouteAssignment.Ipv4InclusionRoutes.Add(new VpnRoute(new HostName("10.189.129.1"), 32));
 
-                var vpnDomainNameAssignment = new VpnDomainNameAssignment();
-                vpnDomainNameAssignment.DomainNameList.Add(new VpnDomainNameInfo("wireguard.host",VpnDomainNameType.FullyQualified, null,null));
-                vpnDomainNameAssignment.DomainNameList.Add(new VpnDomainNameInfo(".",VpnDomainNameType.Suffix, new []{new HostName("1.1.1.1"), },null));
                 channel.StartExistingTransports( 
-                    new[] { new HostName("10.1.1.1"), //this is our network interface address
+                    new[] { new HostName("10.189.129.2"), //this is our network interface address
                         }, 
                     null,
                     null,
                     vpnRouteAssignment,
-                    vpnDomainNameAssignment,
+                    null,
                     VPN_MTU,
                     VPN_MAX_FRAME,
                     false
